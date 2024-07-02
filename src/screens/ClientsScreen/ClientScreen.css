@@ -1,0 +1,46 @@
+@media (min-width: 800px) {
+  .main-div {
+    padding: 40px;
+  }
+}
+
+@media (max-width: 799px) {
+  .main-div {
+    padding: 10px;
+    padding-top: 40px;
+  }
+}
+.title {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.table-div {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.inner-table {
+  min-width: 700px;
+}
+
+.main-div {
+  background-color: white;
+  height: 100%;
+}
+.salesman_image {
+  width: 140px;
+  align-self: center;
+}
+
+.salesman_div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.salesman_h1 {
+  text-align: center;
+}

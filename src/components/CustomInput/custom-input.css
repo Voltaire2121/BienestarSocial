@@ -1,0 +1,22 @@
+.input-small {
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.input-big {
+  width: 97%;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.input-list {
+  height: 55px;
+  width: 93%;
+  border-radius: 5px;
+  border: 1px solid lightgray;
+  padding-left: 10px;
+  font-family: Roboto;
+  font-size: 16px;
+  padding-right: 10px;
+  cursor: pointer;
+}

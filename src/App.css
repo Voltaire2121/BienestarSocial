@@ -1,0 +1,17 @@
+body {
+  font-family: sans-serif;
+  overflow: hidden;
+}
+
+.parentDiv {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.leftdiv {
+  width: auto;
+  height: '100%';
+  background-color: blue;
+}

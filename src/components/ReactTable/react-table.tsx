@@ -1,0 +1,336 @@
+import {
+  Table,
+  Header,
+  HeaderRow,
+  Body,
+  Row,
+  HeaderCell,
+  Cell,
+} from '@table-library/react-table-library/table'
+import {
+  useSort,
+  HeaderCellSort,
+} from '@table-library/react-table-library/sort'
+import { useTheme } from '@table-library/react-table-library/theme'
+import { getTheme } from '@table-library/react-table-library/baseline'
+import { useState } from 'react'
+import Client from '../../classes/Client'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons'
+import {
+  deleteClient,
+  updateClientField,
+  uploadClient,
+} from '../../services/firebase'
+import withReactContent from 'sweetalert2-react-content'
+import Swal, { SweetAlertResult } from 'sweetalert2'
+import './react-table.css'
+import { normalizeString } from '../../utils/strings'
+
+type props = {
+  renderDataTemp: Client[]
+  editClientPressed?: (client_id: string) => void
+}
+
+const ReactTable: React.FC<props> = ({ renderDataTemp, editClientPressed }) => {
+  const theme = useTheme([
+    getTheme(),
+    {
+      HeaderRow: `
+        background-color: #35a836; color: #ffffff;
+      `,
+      Row: `
+        &:nth-of-type(odd) {
+          background-color: #35a83620; cursor: pointer;
+        }
+
+        &:nth-of-type(even) {
+          background-color: #35a83605; cursor: pointer;
+        }
+      `,
+    },
+  ])
+
+  const renderData = renderDataTemp.map((clientTemp: Client) => {
+    console.log(clientTemp)
+    return { ...clientTemp, id: clientTemp.client_id }
+  })
+
+  const [search, setSearch] = useState('')
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value)
+  }
+
+  const MySwal = withReactContent(Swal)
+
+  const showDeleteConfirmation = (userId: string, userName: string) => {
+    MySwal.fire({
+      title: 'Seguro que desea eliminar al usuario:\n' + userName + '?',
+      text: 'Esta acción no podrá ser revertida',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      focusConfirm: false,
+      cancelButtonColor: '#35a836',
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Atrás',
+      reverseButtons: true,
+    }).then((result: SweetAlertResult<any>) => {
+      if (result.isConfirmed) {
+        deleteClient(userId)
+          .then(() =>
+            MySwal.fire(
+              'Eliminado!',
+              `El usuario ${userName} ha sido eliminado correctamente`,
+              'success',
+            ),
+          )
+          .catch(() =>
+            MySwal.fire(
+              'Error',
+              `Hubo un problema eliminando al usuario ${userName}`,
+              'error',
+            ),
+          )
+      }
+    })
+  }
+
+  const showDatePicker = async (client: Client) => {
+    const result = await MySwal.fire({
+      title: 'Actualizar último pago',
+      text: client.name + ' ' + client.lastname,
+      input: 'date',
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: 'Actualizar',
+      cancelButtonText: 'Cancelar',
+      denyButtonText: 'Marcar no pagado',
+      preConfirm: (selectedDate_1) => {
+        if (!selectedDate_1) {
+          MySwal.showValidationMessage('Por favor, selecciona una fecha.')
+          return false
+        }
+        return selectedDate_1
+      },
+    })
+    if (result.isConfirmed) {
+      const selectedDate = result.value
+      uploadClient({ ...client, last_payment: selectedDate })
+        .then(() =>
+          MySwal.fire(
+            'Último pago actualizado!',
+            `El usuario ${client.name} ${client.lastname} ha sido actualizado correctamente`,
+            'success',
+          ),
+        )
+        .catch((error) => {
+          console.log(error)
+        })
+      if (client.type === 'Principal') {
+        client.beneficiaries.map((beneficiary) =>
+          updateClientField(beneficiary, 'last_payment', selectedDate),
+        )
+      }
+    }
+    if (result.isDenied) {
+      uploadClient({ ...client, last_payment: '' })
+        .then(() =>
+          MySwal.fire(
+            'Marcado como no pagado!',
+            `El usuario ${client.name} ${client.lastname} ha sido actualizado correctamente`,
+            'success',
+          ),
+        )
+        .catch((error) => {
+          console.log(error)
+        })
+    }
+  }
+
+  const showBeneficiaryAlert = () => {
+    MySwal.fire(
+      'Advertencia!',
+      `Los pagos solo pueden ser actualizados desde el cliente principal`,
+      'warning',
+    )
+  }
+
+  type ClientStatus = {
+    status: string
+    color: string
+  }
+
+  const checkClientStatus = (lastPayment: string): ClientStatus => {
+    if (lastPayment === 'Sin pago') return { status: 'Inactivo', color: 'red' }
+    const today = new Date()
+    const lastPaymentDate = new Date(
+      parseInt(lastPayment.substring(0, 4)),
+      parseInt(lastPayment.substring(5, 7)) - 1,
+      parseInt(lastPayment.substring(8)),
+    )
+    const timeDifference = Math.abs(today.getTime() - lastPaymentDate.getTime())
+
+    // Convert time difference from milliseconds to days
+    const daysDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24))
+    if (daysDifference > 45) return { status: 'Inactivo', color: 'red' }
+    if (daysDifference > 30) return { status: 'Mora', color: '#db9a08' }
+    return { status: 'Activo', color: 'darkblue' }
+  }
+
+  const nodes = renderData?.filter(
+    (item: Client) =>
+      normalizeString(item.name).includes(normalizeString(search)) ||
+      normalizeString(item.lastname).includes(normalizeString(search)) ||
+      item.client_id.toLowerCase().includes(search.toLowerCase()) ||
+      item.telephone.toString().includes(search.toLowerCase()) ||
+      normalizeString(item.address).includes(normalizeString(search)) ||
+      normalizeString(item.last_payment).includes(normalizeString(search)),
+  )
+
+  const data = { nodes }
+
+  const sort = useSort(
+    data,
+    {
+      onChange: onSortChange,
+    },
+    {
+      sortFns: {
+        ID: (array) =>
+          array.sort((a, b) => a.client_id.localeCompare(b.client_id)),
+        NAME: (array) => array.sort((a, b) => a.name.localeCompare(b.name)),
+        TELEPHONE: (array) =>
+          array.sort((a, b) => a.telephone.localeCompare(b.telephone)),
+        ADDRESS: (array) =>
+          array.sort((a, b) => a.address.localeCompare(b.address)),
+        TYPE: (array) => array.sort((a, b) => a.type.localeCompare(b.type)),
+        PAYMENT: (array) =>
+          array.sort((a, b) => a.last_payment.localeCompare(b.last_payment)),
+      },
+    },
+  )
+
+  function onSortChange() {
+    console.log('sorted')
+  }
+
+  return (
+    <>
+      <div className="search-div">
+        <label className="search-label">Buscar </label>
+        <input className="search-input" onChange={handleSearch} />
+      </div>
+      <div>
+        <Table
+          className="table"
+          data={data}
+          theme={theme}
+          sort={sort}
+          layout={{ horizontalScroll: true }}
+        >
+          {(tableList: Client[]) => (
+            <>
+              <Header>
+                <HeaderRow>
+                  <HeaderCellSort sortKey="ID" resize>
+                    Cédula
+                  </HeaderCellSort>
+                  <HeaderCellSort sortKey="NAME" resize>
+                    Nombre
+                  </HeaderCellSort>
+                  <HeaderCellSort sortKey="TELEPHONE" resize>
+                    Teléfono
+                  </HeaderCellSort>
+                  <HeaderCellSort sortKey="ADDRESS" resize>
+                    Dirección
+                  </HeaderCellSort>
+                  <HeaderCellSort sortKey="TYPE" resize>
+                    Tipo usuario
+                  </HeaderCellSort>
+                  <HeaderCellSort sortKey="PAYMENT" resize>
+                    Ultimo pago
+                  </HeaderCellSort>
+                  <HeaderCellSort sortKey="PAYMENT" resize>
+                    Estado
+                  </HeaderCellSort>
+                  <HeaderCell> </HeaderCell>
+                </HeaderRow>
+              </Header>
+
+              <Body>
+                {tableList.map((item) => {
+                  const { status, color } = checkClientStatus(item.last_payment)
+
+                  return (
+                    <Row
+                      key={item.client_id}
+                      item={{ ...item, id: item.client_id }}
+                    >
+                      <Cell>{item.client_id}</Cell>
+                      <Cell>{item.name + ' ' + item.lastname}</Cell>
+                      <Cell>{item.telephone}</Cell>
+                      <Cell>{item.address}</Cell>
+                      <Cell>
+                        {item.type === 'Principal' && <p>{item.type}</p>}
+                        {item.type === 'Beneficiario' && (
+                          <div className="beneficiary_div">
+                            <p>{item.type}</p>
+                            <p>{`(${item.main_user_id})`}</p>
+                          </div>
+                        )}
+                      </Cell>
+                      <Cell
+                        onClick={() =>
+                          item.type === 'Principal'
+                            ? showDatePicker(item)
+                            : showBeneficiaryAlert()
+                        }
+                      >
+                        <p
+                          style={{
+                            color:
+                              item.last_payment === 'Sin pago' ? 'red' : '',
+                          }}
+                        >
+                          {' '}
+                          {item.last_payment}
+                        </p>
+                      </Cell>
+                      <Cell>
+                        <p style={{ color: color }}>{status}</p>
+                      </Cell>
+                      <Cell>
+                        <FontAwesomeIcon
+                          icon={faPenToSquare}
+                          style={{ marginRight: '10px' }}
+                          onClick={() =>
+                            editClientPressed
+                              ? editClientPressed(item.client_id)
+                              : null
+                          }
+                        />
+                        <FontAwesomeIcon
+                          icon={faTrash}
+                          onClick={() =>
+                            showDeleteConfirmation(
+                              item.client_id,
+                              item.name + ' ' + item.lastname,
+                            )
+                          }
+                        />
+                      </Cell>
+                    </Row>
+                  )
+                })}
+              </Body>
+            </>
+          )}
+        </Table>
+      </div>
+    </>
+  )
+}
+
+export default ReactTable
