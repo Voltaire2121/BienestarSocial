@@ -216,6 +216,16 @@ const ReactTable: React.FC<props> = ({ renderDataTemp, editClientPressed }) => {
     console.log('sorted')
   }
 
+  const [expandedRows, setExpandedRows] = useState<number[]>([])
+
+  const handleExpandRow = (rowId: number) => {
+    setExpandedRows((prevExpandedRows) =>
+      prevExpandedRows.includes(rowId)
+        ? prevExpandedRows.filter((id) => id !== rowId)
+        : [...prevExpandedRows, rowId],
+    )
+  }
+
   return (
     <>
       <div className="search-div">
@@ -250,7 +260,7 @@ const ReactTable: React.FC<props> = ({ renderDataTemp, editClientPressed }) => {
                     Tipo usuario
                   </HeaderCellSort>
                   <HeaderCellSort sortKey="PAYMENT" resize>
-                    Ultimo pago
+                    Último pago
                   </HeaderCellSort>
                   <HeaderCellSort sortKey="PAYMENT" resize>
                     Estado
@@ -262,66 +272,199 @@ const ReactTable: React.FC<props> = ({ renderDataTemp, editClientPressed }) => {
               <Body>
                 {tableList.map((item) => {
                   const { status, color } = checkClientStatus(item.last_payment)
+                  const isExpanded = expandedRows.includes(
+                    parseInt(item.client_id),
+                  )
 
                   return (
-                    <Row
-                      key={item.client_id}
-                      item={{ ...item, id: item.client_id }}
-                    >
-                      <Cell>{item.client_id}</Cell>
-                      <Cell>{item.name + ' ' + item.lastname}</Cell>
-                      <Cell>{item.telephone}</Cell>
-                      <Cell>{item.address}</Cell>
-                      <Cell>
-                        {item.type === 'Principal' && <p>{item.type}</p>}
-                        {item.type === 'Beneficiario' && (
-                          <div className="beneficiary_div">
-                            <p>{item.type}</p>
-                            <p>{`(${item.main_user_id})`}</p>
-                          </div>
-                        )}
-                      </Cell>
-                      <Cell
+                    <>
+                      <Row
+                        key={item.client_id}
+                        item={{ ...item, id: item.client_id }}
                         onClick={() =>
-                          item.type === 'Principal'
-                            ? showDatePicker(item)
-                            : showBeneficiaryAlert()
+                          handleExpandRow(parseInt(item.client_id))
                         }
                       >
-                        <p
+                        <Cell
                           style={{
-                            color:
-                              item.last_payment === 'Sin pago' ? 'red' : '',
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
+                            )
+                              ? 'bold'
+                              : 'normal',
                           }}
                         >
-                          {' '}
-                          {item.last_payment}
-                        </p>
-                      </Cell>
-                      <Cell>
-                        <p style={{ color: color }}>{status}</p>
-                      </Cell>
-                      <Cell>
-                        <FontAwesomeIcon
-                          icon={faPenToSquare}
-                          style={{ marginRight: '10px' }}
-                          onClick={() =>
-                            editClientPressed
-                              ? editClientPressed(item.client_id)
-                              : null
-                          }
-                        />
-                        <FontAwesomeIcon
-                          icon={faTrash}
-                          onClick={() =>
-                            showDeleteConfirmation(
-                              item.client_id,
-                              item.name + ' ' + item.lastname,
+                          {item.client_id}
+                        </Cell>
+                        <Cell
+                          style={{
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
                             )
+                              ? 'bold'
+                              : 'normal',
+                          }}
+                        >
+                          {item.name + ' ' + item.lastname}
+                        </Cell>
+                        <Cell
+                          style={{
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
+                            )
+                              ? 'bold'
+                              : 'normal',
+                          }}
+                        >
+                          {item.telephone}
+                        </Cell>
+                        <Cell
+                          style={{
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
+                            )
+                              ? 'bold'
+                              : 'normal',
+                          }}
+                        >
+                          {item.address}
+                        </Cell>
+                        <Cell
+                          style={{
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
+                            )
+                              ? 'bold'
+                              : 'normal',
+                          }}
+                        >
+                          {item.type === 'Principal' && <p>{item.type}</p>}
+                          {item.type === 'Beneficiario' && (
+                            <div className="beneficiary_div">
+                              <p>{item.type}</p>
+                              <p>{`(${item.main_user_id})`}</p>
+                            </div>
+                          )}
+                        </Cell>
+                        <Cell
+                          style={{
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
+                            )
+                              ? 'bold'
+                              : 'normal',
+                          }}
+                          onClick={() =>
+                            item.type === 'Principal'
+                              ? showDatePicker(item)
+                              : showBeneficiaryAlert()
                           }
-                        />
-                      </Cell>
-                    </Row>
+                        >
+                          <p
+                            style={{
+                              color:
+                                item.last_payment === 'Sin pago' ? 'red' : '',
+                            }}
+                          >
+                            {' '}
+                            {item.last_payment}
+                          </p>
+                        </Cell>
+                        <Cell
+                          style={{
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
+                            )
+                              ? 'bold'
+                              : 'normal',
+                          }}
+                        >
+                          <p style={{ color: color }}>{status}</p>
+                        </Cell>
+                        <Cell>
+                          <FontAwesomeIcon
+                            icon={faPenToSquare}
+                            style={{ marginRight: '10px' }}
+                            onClick={() =>
+                              editClientPressed
+                                ? editClientPressed(item.client_id)
+                                : null
+                            }
+                          />
+                          <FontAwesomeIcon
+                            icon={faTrash}
+                            onClick={() =>
+                              showDeleteConfirmation(
+                                item.client_id,
+                                item.name + ' ' + item.lastname,
+                              )
+                            }
+                          />
+                        </Cell>
+                      </Row>
+                      {isExpanded && (
+                        <>
+                          <Row item={{ ...item, id: item.client_id }}>
+                            <div className=" first-info-div extra-info-div "></div>
+                            <div className=" first-info-div extra-info-div extra-info-title">
+                              Fecha Creación:
+                            </div>
+                            <div className="extra-info-div first-info-div">
+                              {item.creation_date}
+                            </div>
+                            <div className="extra-info-div extra-info-title first-info-div">
+                              Creado por:
+                            </div>
+                            <div className="extra-info-div first-info-div">
+                              {item.created_by}
+                            </div>
+                            <div className="extra-info-div"></div>
+                            <div className="extra-info-div"></div>
+                            <div className="extra-info-div"></div>
+                          </Row>
+                          <Row item={{ ...item, id: item.client_id }}>
+                            <div className="extra-info-div "></div>
+                            <div className="extra-info-div extra-info-title">
+                              Fecha nacimiento:
+                            </div>
+                            <div className="extra-info-div">
+                              {item.birthdate}
+                            </div>
+                            <div className="extra-info-div extra-info-title">
+                              Email:
+                            </div>
+                            <div className="extra-info-div">{item.email}</div>
+                            <div className="extra-info-div"></div>
+                            <div className="extra-info-div"></div>
+                            <div className="extra-info-div"></div>
+                          </Row>
+                          <Row item={{ ...item, id: item.client_id }}>
+                            <div className="extra-info-div "></div>
+                            <div className="extra-info-div extra-info-title">
+                              Tipo documento:
+                            </div>
+                            <div className="extra-info-div last-info-div">
+                              {item.id_type || 'No definido'}
+                            </div>
+                            <div className="extra-info-div extra-info-title">
+                              Mascotas:
+                            </div>
+                            <div className="extra-info-div">
+                              {item.type === 'Principal'
+                                ? item.pets_number +
+                                  ' ' +
+                                  (item.pets_names
+                                    ? `(${item.pets_names})`
+                                    : '')
+                                : '(Ver usuario principal)'}
+                            </div>
+                            <div className="extra-info-div"></div>
+                            <div className="extra-info-div"></div>
+                            <div className="extra-info-div"></div>
+                          </Row>
+                        </>
+                      )}
+                    </>
                   )
                 })}
               </Body>

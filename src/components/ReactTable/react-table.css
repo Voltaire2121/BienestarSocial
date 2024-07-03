@@ -28,3 +28,21 @@
   margin-top: -3px;
   margin-bottom: -5px;
 }
+
+.extra-info-div {
+  background-color: white;
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+
+.extra-info-title {
+  font-weight: bold;
+}
+
+.first-info-div {
+  margin-top: 18px;
+}
+
+.last-info-div {
+  margin-bottom: 18px;
+}

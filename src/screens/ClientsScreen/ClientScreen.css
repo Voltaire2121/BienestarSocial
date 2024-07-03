@@ -1,6 +1,7 @@
 @media (min-width: 800px) {
   .main-div {
     padding: 40px;
+    overflow-y: auto;
   }
 }
 
@@ -8,6 +9,7 @@
   .main-div {
     padding: 10px;
     padding-top: 40px;
+    overflow-y: auto;
   }
 }
 .title {

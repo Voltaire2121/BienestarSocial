@@ -18,6 +18,7 @@ export default class Client {
   created_by: string
   pets_number: string
   pets_names: string
+  id_type: string
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, complexity
   constructor(
@@ -40,6 +41,7 @@ export default class Client {
     created_by?: string,
     pets_number?: string,
     pets_names?: string,
+    id_type?: string,
   ) {
     this.client_id = client_id
     this.name = name
@@ -60,5 +62,6 @@ export default class Client {
     this.created_by = created_by || ''
     this.pets_number = pets_number || '0'
     this.pets_names = pets_names || ''
+    this.id_type = id_type || ''
   }
 }

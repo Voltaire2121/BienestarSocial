@@ -72,7 +72,10 @@ const ClientScreen = () => {
       </div>
       <NewUserForm
         isShown={showUserForm}
-        closePressed={() => setShowUserForm(false)}
+        closePressed={() => {
+          setShowUserForm(false)
+          setClientToEdit(undefined)
+        }}
         hidePressed={() => {
           setClientToEdit(undefined)
           setShowUserForm(false)

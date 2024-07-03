@@ -21,17 +21,6 @@ import {
 import Client from '../classes/Client'
 import firebaseConfig from './firebase-config'
 
-// const firebaseConfig = {
-//   apiKey: 'AIzaSyBo2K1kBWi0rUKK0db8n0RIXdW2G_sKiVU',
-//   authDomain: 'bienestar-social-22763.firebaseapp.com',
-//   databaseURL: 'https://bienestar-social-22763-default-rtdb.firebaseio.com',
-//   projectId: 'bienestar-social-22763',
-//   storageBucket: 'bienestar-social-22763.appspot.com',
-//   messagingSenderId: '1037782744338',
-//   appId: '1:1037782744338:web:5dc944cd2a53ec62d5c7cb',
-//   measurementId: 'G-4VBM5V62QW',
-// }
-
 const app = initializeApp(firebaseConfig)
 const database = getDatabase(app)
 
@@ -65,6 +54,7 @@ export const useClients = () => {
           created_by = '',
           pets_number = '0',
           pets_names = '',
+          id_type = '',
         } = childSnapshot.val()
 
         clientsArray.push(
@@ -88,6 +78,7 @@ export const useClients = () => {
             created_by,
             pets_number,
             pets_names,
+            id_type,
           ),
         )
         if (type === 'Principal') {
