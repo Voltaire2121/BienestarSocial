@@ -205,7 +205,19 @@ const ReactTable: React.FC<props> = ({ renderDataTemp, editClientPressed }) => {
           array.sort((a, b) => a.telephone.localeCompare(b.telephone)),
         ADDRESS: (array) =>
           array.sort((a, b) => a.address.localeCompare(b.address)),
-        TYPE: (array) => array.sort((a, b) => a.type.localeCompare(b.type)),
+        TYPE: (array) =>
+          array.sort((a, b) => {
+            const aPrimaryClientId =
+              a.type === 'Principal' ? a.client_id : a.main_user_id
+            const bPrimaryClientId =
+              b.type === 'Principal' ? b.client_id : b.main_user_id
+            if (aPrimaryClientId === bPrimaryClientId) {
+              if (a.type === 'Principal') return -1
+              if (b.type === 'Principal') return 1
+              return 0
+            }
+            return aPrimaryClientId.localeCompare(bPrimaryClientId)
+          }),
         PAYMENT: (array) =>
           array.sort((a, b) => a.last_payment.localeCompare(b.last_payment)),
       },
