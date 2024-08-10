@@ -10,13 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.4",
-    "@emotion/styled": "^11.11.5",
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
+    "@fontsource/roboto": "^5.0.14",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@mui/icons-material": "^5.15.20",
-    "@mui/material": "^5.15.20",
+    "@mui/material": "^5.16.7",
+    "@mui/styled-engine-sc": "^6.0.0-alpha.18",
     "@table-library/react-table-library": "^4.1.7",
     "firebase": "^10.12.2",
     "react": "^18.2.0",
@@ -25,7 +27,7 @@
     "react-pro-sidebar": "^1.1.0",
     "react-router-dom": "^6.23.1",
     "react-sweetalert2": "^0.6.0",
-    "styled-components": "^6.1.11",
+    "styled-components": "^6.1.12",
     "sweetalert2": "^11.12.0",
     "sweetalert2-react-content": "^5.0.7",
     "typeface-roboto": "^1.1.13"

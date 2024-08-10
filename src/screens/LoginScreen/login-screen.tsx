@@ -1,11 +1,8 @@
 import { useState } from 'react'
-import CssBaseline from '@mui/material/CssBaseline'
-import createTheme from '@mui/material/styles/createTheme'
 import { CustomInput } from '../../components/CustomInput/custom-input'
 import './login-screen.css'
 import 'typeface-roboto'
 import { CheckEmail } from '../../utils/strings'
-import { Box } from '@mui/material'
 import { userLogin } from '../../services/firebase'
 
 const LoginScreen = () => {

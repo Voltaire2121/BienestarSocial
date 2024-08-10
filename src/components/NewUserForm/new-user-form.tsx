@@ -1,6 +1,4 @@
-import CssBaseline from '@mui/material/CssBaseline'
-import createTheme from '@mui/material/styles/createTheme'
-import { Box, FormControl, TextField } from '@mui/material'
+import { FormControl, TextField } from '@mui/material'
 import PersonIcon from '@mui/icons-material/Person'
 import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom'
 import './new-user.css'
@@ -272,15 +270,7 @@ const NewUserForm: React.FC<props> = ({
             </div>
           </div>
         </div>
-        {/* <Box
-          style={{ marginLeft: -10 }}
-          component="form"
-          sx={{
-            '& > :not(style)': { m: 1 },
-          }}
-          noValidate
-          autoComplete="off"
-        >
+        <div className="input-div">
           <CustomInput
             inputPlaceholder="Nombres*"
             showError={nameError}
@@ -379,7 +369,7 @@ const NewUserForm: React.FC<props> = ({
               />
             </>
           )}
-        </Box> */}
+        </div>
         <button
           className="submit"
           style={{ background: theme.colors.primary }}

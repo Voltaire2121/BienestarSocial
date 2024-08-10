@@ -1,12 +1,11 @@
 import AppBar from '@mui/material/AppBar'
-import Box from '@mui/material/Box'
 import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
 import Container from '@mui/material/Container'
 import Avatar from '@mui/material/Avatar'
 import Tooltip from '@mui/material/Tooltip'
 import './main-header.css'
-import { Menu, MenuItem, Typography } from '@mui/material'
+import { Box, Menu, MenuItem, Typography } from '@mui/material'
 import { useState } from 'react'
 import { userLogout } from '../../services/firebase'
 
@@ -51,19 +50,19 @@ const MainHeader = () => {
             color="warning"
             style={{ width: 50, height: 50, zIndex: 30 }}
           />
-          {/* <Box sx={{ flexGrow: 1 }}>
-            {<IconButton
+          <Box sx={{ flexGrow: 1 }}>
+            <IconButton
               size="large"
               aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="white"
+              //onClick={handleOpenNavMenu}
+              //color="white"
               style={{ color: 'white' }}
-            > }
-            <MenuIcon className="Shown_when_small" />
+            >
+              {/* <MenuIcon className="Shown_when_small" /> */}
             </IconButton>
-          </Box> */}
+          </Box>
           <div className="small-image-container">
             <img
               className="Shown_when_small small-image"
@@ -82,10 +81,10 @@ const MainHeader = () => {
                 </div>
               ))}
 
-              {/* <div className="header-li">Citas</div>
+              <div className="header-li">Citas</div>
               <div className="header-li">Profesionales</div>
               <div className="header-li">Fómulas</div>
-              <div className="header-li">Exámenes</div> */}
+              <div className="header-li">Exámenes</div>
             </ul>
           </Box>
 

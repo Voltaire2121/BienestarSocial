@@ -46,7 +46,7 @@
   padding-bottom: 30px;
   min-width: 320px;
   height: fit-content;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .top-line {
@@ -195,4 +195,11 @@
     transform: scale(1.8);
     opacity: 0;
   }
+}
+
+.input-div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
 }
