@@ -16,7 +16,11 @@ import { getTheme } from '@table-library/react-table-library/baseline'
 import { useState } from 'react'
 import Client from '../../classes/Client'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons'
+import {
+  faPenToSquare,
+  faTrash,
+  faMessage,
+} from '@fortawesome/free-solid-svg-icons'
 import {
   deleteClient,
   updateClientField,
@@ -96,6 +100,59 @@ const ReactTable: React.FC<props> = ({ renderDataTemp, editClientPressed }) => {
           )
       }
     })
+  }
+
+  const showMessagePrompt = async (client: Client) => {
+    const result = await MySwal.fire({
+      title: 'Agregar comentario',
+      text: client.name + ' ' + client.lastname,
+      input: 'text',
+      inputValue: client.notes,
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: 'Guardar',
+      denyButtonText: 'Borrar',
+      cancelButtonText: 'Atrás',
+    })
+    if (result.isConfirmed) {
+      uploadClient({ ...client, notes: result.value })
+        .then(() =>
+          MySwal.fire(
+            'Comentario actualizado!',
+            `Se ha actualizado el comentario para el cliente ${client.name} ${client.lastname}`,
+            'success',
+          ),
+        )
+        .catch((error) => {
+          console.log(error)
+        })
+      return
+    }
+    if (result.isDenied) {
+      const deletConfirmation = await MySwal.fire({
+        title: 'Está seguro de borrar el comentario?',
+        text: `Esta accion no podrá ser revertida para el cliente ${client.name} ${client.lastname}`,
+        showCancelButton: true,
+        showConfirmButton: true,
+        confirmButtonColor: 'red',
+        confirmButtonText: 'Borrar',
+        cancelButtonText: 'Atrás',
+      })
+      if (deletConfirmation.isConfirmed) {
+        uploadClient({ ...client, notes: '' })
+          .then(() =>
+            MySwal.fire(
+              'Comentario eliminado!',
+              `Se ha eliminado el comentario del cliente ${client.name} ${client.lastname}`,
+              'error',
+            ),
+          )
+          .catch((error) => {
+            console.log(error)
+          })
+        return
+      }
+    }
   }
 
   const showDatePicker = async (client: Client) => {
@@ -384,12 +441,18 @@ const ReactTable: React.FC<props> = ({ renderDataTemp, editClientPressed }) => {
                           />
                           <FontAwesomeIcon
                             icon={faTrash}
+                            style={{ marginRight: '10px' }}
                             onClick={() =>
                               showDeleteConfirmation(
                                 item.client_id,
                                 item.name + ' ' + item.lastname,
                               )
                             }
+                          />
+                          <FontAwesomeIcon
+                            color={item.notes ? 'green' : 'gray'}
+                            icon={faMessage}
+                            onClick={() => showMessagePrompt(item)}
                           />
                         </Cell>
                       </Row>
