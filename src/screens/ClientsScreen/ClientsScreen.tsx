@@ -111,11 +111,11 @@ const ClientScreen = () => {
           bottom: clientType === 'admin' ? 34 : '45%',
         }}
       >
-        {/* <HoverButton
+        <HoverButton
           text="Crear"
           size={clientType === 'salesman' ? 85 : 45}
           onClick={() => setShowUserForm(true)}
-        /> */}
+        />
       </div>
       <NewUserForm
         isShown={showUserForm}
