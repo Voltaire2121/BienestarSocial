@@ -1,3 +1,5 @@
+import CssBaseline from '@mui/material/CssBaseline'
+import createTheme from '@mui/material/styles/createTheme'
 import { Box, FormControl, TextField } from '@mui/material'
 import PersonIcon from '@mui/icons-material/Person'
 import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom'
@@ -270,7 +272,7 @@ const NewUserForm: React.FC<props> = ({
             </div>
           </div>
         </div>
-        <Box
+        {/* <Box
           style={{ marginLeft: -10 }}
           component="form"
           sx={{
@@ -377,7 +379,7 @@ const NewUserForm: React.FC<props> = ({
               />
             </>
           )}
-        </Box>
+        </Box> */}
         <button
           className="submit"
           style={{ background: theme.colors.primary }}

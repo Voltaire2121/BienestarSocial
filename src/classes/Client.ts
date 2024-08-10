@@ -4,7 +4,7 @@ export default class Client {
   lastname: string
   creation_date: string
   last_edit_date: string
-  type: string
+  type: 'Principal' | 'Beneficiario'
   address: string
   city: string
   region: string
@@ -19,6 +19,7 @@ export default class Client {
   pets_number: string
   pets_names: string
   id_type: string
+  notes: string
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, complexity
   constructor(
@@ -26,7 +27,7 @@ export default class Client {
     name: string,
     creation_date: string,
     last_edit_date: string,
-    type: string,
+    type: 'Principal' | 'Beneficiario',
     address: string,
     city: string,
     region: string,
@@ -42,6 +43,7 @@ export default class Client {
     pets_number?: string,
     pets_names?: string,
     id_type?: string,
+    notes?: string,
   ) {
     this.client_id = client_id
     this.name = name
@@ -63,5 +65,6 @@ export default class Client {
     this.pets_number = pets_number || '0'
     this.pets_names = pets_names || ''
     this.id_type = id_type || ''
+    this.notes = notes || ''
   }
 }

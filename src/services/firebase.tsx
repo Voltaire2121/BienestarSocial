@@ -20,13 +20,37 @@ import {
 } from 'firebase/auth'
 import Client from '../classes/Client'
 import firebaseConfig from './firebase-config'
+import { checkClientStatus } from '../utils/clients'
 
 const app = initializeApp(firebaseConfig)
 const database = getDatabase(app)
 
 export const useClients = () => {
   const [clients, setClients] = useState<Client[]>([])
+  const [totalClients, setTotalClients] = useState(0)
+  const [principalClients, setPrincipalClients] = useState(0)
+  const [secondaryClients, setSecondaryClients] = useState(0)
+  const [activeClients, setActiveClients] = useState(0)
   const [mainClientsIds, setMainClientsIds] = useState<string[]>([])
+
+  useEffect(() => {
+    if (clients.length === 0) return
+    let totalTemp = 0
+    let totalPrincipalTemp = 0
+    let totalSecondaryTemp = 0
+    let totalActiveTemp = 0
+    clients.forEach((client) => {
+      totalTemp++
+      if (client.type === 'Principal') totalPrincipalTemp++
+      if (client.type === 'Beneficiario') totalSecondaryTemp++
+      if (checkClientStatus(client.last_payment).status === 'Activo')
+        totalActiveTemp++
+    })
+    setTotalClients(totalTemp)
+    setPrincipalClients(totalPrincipalTemp)
+    setSecondaryClients(totalSecondaryTemp)
+    setActiveClients(totalActiveTemp)
+  }, [clients])
 
   useEffect(() => {
     const databaseRef = ref(database, 'Clients/')
@@ -55,6 +79,7 @@ export const useClients = () => {
           pets_number = '0',
           pets_names = '',
           id_type = '',
+          notes = '',
         } = childSnapshot.val()
 
         clientsArray.push(
@@ -79,6 +104,7 @@ export const useClients = () => {
             pets_number,
             pets_names,
             id_type,
+            notes,
           ),
         )
         if (type === 'Principal') {
@@ -94,7 +120,14 @@ export const useClients = () => {
     return () => unsubscribe()
   }, [])
 
-  return { clients, mainClientsIds }
+  return {
+    clients,
+    mainClientsIds,
+    totalClients,
+    principalClients,
+    secondaryClients,
+    activeClients,
+  }
 }
 
 export const uploadClient = async (client: Client) => {

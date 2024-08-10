@@ -116,3 +116,10 @@ body {
   width: 70px;
   margin-left: 10px;
 }
+
+.email-password {
+  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
