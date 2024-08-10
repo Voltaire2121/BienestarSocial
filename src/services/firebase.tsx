@@ -20,24 +20,37 @@ import {
 } from 'firebase/auth'
 import Client from '../classes/Client'
 import firebaseConfig from './firebase-config'
-
-// const firebaseConfig = {
-//   apiKey: 'AIzaSyBo2K1kBWi0rUKK0db8n0RIXdW2G_sKiVU',
-//   authDomain: 'bienestar-social-22763.firebaseapp.com',
-//   databaseURL: 'https://bienestar-social-22763-default-rtdb.firebaseio.com',
-//   projectId: 'bienestar-social-22763',
-//   storageBucket: 'bienestar-social-22763.appspot.com',
-//   messagingSenderId: '1037782744338',
-//   appId: '1:1037782744338:web:5dc944cd2a53ec62d5c7cb',
-//   measurementId: 'G-4VBM5V62QW',
-// }
+import { checkClientStatus } from '../utils/clients'
 
 const app = initializeApp(firebaseConfig)
 const database = getDatabase(app)
 
 export const useClients = () => {
   const [clients, setClients] = useState<Client[]>([])
+  const [totalClients, setTotalClients] = useState(0)
+  const [principalClients, setPrincipalClients] = useState(0)
+  const [secondaryClients, setSecondaryClients] = useState(0)
+  const [activeClients, setActiveClients] = useState(0)
   const [mainClientsIds, setMainClientsIds] = useState<string[]>([])
+
+  useEffect(() => {
+    if (clients.length === 0) return
+    let totalTemp = 0
+    let totalPrincipalTemp = 0
+    let totalSecondaryTemp = 0
+    let totalActiveTemp = 0
+    clients.forEach((client) => {
+      totalTemp++
+      if (client.type === 'Principal') totalPrincipalTemp++
+      if (client.type === 'Beneficiario') totalSecondaryTemp++
+      if (checkClientStatus(client.last_payment).status === 'Activo')
+        totalActiveTemp++
+    })
+    setTotalClients(totalTemp)
+    setPrincipalClients(totalPrincipalTemp)
+    setSecondaryClients(totalSecondaryTemp)
+    setActiveClients(totalActiveTemp)
+  }, [clients])
 
   useEffect(() => {
     const databaseRef = ref(database, 'Clients/')
@@ -65,6 +78,8 @@ export const useClients = () => {
           created_by = '',
           pets_number = '0',
           pets_names = '',
+          id_type = '',
+          notes = '',
         } = childSnapshot.val()
 
         clientsArray.push(
@@ -88,6 +103,8 @@ export const useClients = () => {
             created_by,
             pets_number,
             pets_names,
+            id_type,
+            notes,
           ),
         )
         if (type === 'Principal') {
@@ -103,7 +120,14 @@ export const useClients = () => {
     return () => unsubscribe()
   }, [])
 
-  return { clients, mainClientsIds }
+  return {
+    clients,
+    mainClientsIds,
+    totalClients,
+    principalClients,
+    secondaryClients,
+    activeClients,
+  }
 }
 
 export const uploadClient = async (client: Client) => {

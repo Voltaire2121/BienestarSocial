@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import CssBaseline from '@mui/material/CssBaseline'
+import createTheme from '@mui/material/styles/createTheme'
 import { CustomInput } from '../../components/CustomInput/custom-input'
 import './login-screen.css'
 import 'typeface-roboto'
@@ -39,15 +41,7 @@ const LoginScreen = () => {
           <p className="show-when-small">
             Sistema de gestión y automatización de procesos generales
           </p>
-          <Box
-            style={{ marginLeft: -10 }}
-            component="form"
-            sx={{
-              '& > :not(style)': { m: 1 },
-            }}
-            noValidate
-            autoComplete="off"
-          >
+          <div className="email-password">
             <CustomInput
               inputPlaceholder="Correo Electronico"
               onChange={setUserName}
@@ -65,7 +59,7 @@ const LoginScreen = () => {
               errorText="El password debe tener al menos 6 letras"
               inputType="password"
             />
-          </Box>
+          </div>
 
           <button className="login-button" onClick={handleLoginPress}>
             ingresar

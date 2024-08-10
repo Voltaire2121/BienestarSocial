@@ -26,6 +26,7 @@ import withReactContent from 'sweetalert2-react-content'
 import Swal, { SweetAlertResult } from 'sweetalert2'
 import './react-table.css'
 import { normalizeString } from '../../utils/strings'
+import { checkClientStatus } from '../../utils/clients'
 
 type props = {
   renderDataTemp: Client[]
@@ -157,28 +158,6 @@ const ReactTable: React.FC<props> = ({ renderDataTemp, editClientPressed }) => {
     )
   }
 
-  type ClientStatus = {
-    status: string
-    color: string
-  }
-
-  const checkClientStatus = (lastPayment: string): ClientStatus => {
-    if (lastPayment === 'Sin pago') return { status: 'Inactivo', color: 'red' }
-    const today = new Date()
-    const lastPaymentDate = new Date(
-      parseInt(lastPayment.substring(0, 4)),
-      parseInt(lastPayment.substring(5, 7)) - 1,
-      parseInt(lastPayment.substring(8)),
-    )
-    const timeDifference = Math.abs(today.getTime() - lastPaymentDate.getTime())
-
-    // Convert time difference from milliseconds to days
-    const daysDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24))
-    if (daysDifference > 45) return { status: 'Inactivo', color: 'red' }
-    if (daysDifference > 30) return { status: 'Mora', color: '#db9a08' }
-    return { status: 'Activo', color: 'darkblue' }
-  }
-
   const nodes = renderData?.filter(
     (item: Client) =>
       normalizeString(item.name).includes(normalizeString(search)) ||
@@ -205,7 +184,19 @@ const ReactTable: React.FC<props> = ({ renderDataTemp, editClientPressed }) => {
           array.sort((a, b) => a.telephone.localeCompare(b.telephone)),
         ADDRESS: (array) =>
           array.sort((a, b) => a.address.localeCompare(b.address)),
-        TYPE: (array) => array.sort((a, b) => a.type.localeCompare(b.type)),
+        TYPE: (array) =>
+          array.sort((a, b) => {
+            const aPrimaryClientId =
+              a.type === 'Principal' ? a.client_id : a.main_user_id
+            const bPrimaryClientId =
+              b.type === 'Principal' ? b.client_id : b.main_user_id
+            if (aPrimaryClientId === bPrimaryClientId) {
+              if (a.type === 'Principal') return -1
+              if (b.type === 'Principal') return 1
+              return 0
+            }
+            return aPrimaryClientId.localeCompare(bPrimaryClientId)
+          }),
         PAYMENT: (array) =>
           array.sort((a, b) => a.last_payment.localeCompare(b.last_payment)),
       },
@@ -214,6 +205,16 @@ const ReactTable: React.FC<props> = ({ renderDataTemp, editClientPressed }) => {
 
   function onSortChange() {
     console.log('sorted')
+  }
+
+  const [expandedRows, setExpandedRows] = useState<number[]>([])
+
+  const handleExpandRow = (rowId: number) => {
+    setExpandedRows((prevExpandedRows) =>
+      prevExpandedRows.includes(rowId)
+        ? prevExpandedRows.filter((id) => id !== rowId)
+        : [...prevExpandedRows, rowId],
+    )
   }
 
   return (
@@ -250,7 +251,7 @@ const ReactTable: React.FC<props> = ({ renderDataTemp, editClientPressed }) => {
                     Tipo usuario
                   </HeaderCellSort>
                   <HeaderCellSort sortKey="PAYMENT" resize>
-                    Ultimo pago
+                    Último pago
                   </HeaderCellSort>
                   <HeaderCellSort sortKey="PAYMENT" resize>
                     Estado
@@ -262,66 +263,199 @@ const ReactTable: React.FC<props> = ({ renderDataTemp, editClientPressed }) => {
               <Body>
                 {tableList.map((item) => {
                   const { status, color } = checkClientStatus(item.last_payment)
+                  const isExpanded = expandedRows.includes(
+                    parseInt(item.client_id),
+                  )
 
                   return (
-                    <Row
-                      key={item.client_id}
-                      item={{ ...item, id: item.client_id }}
-                    >
-                      <Cell>{item.client_id}</Cell>
-                      <Cell>{item.name + ' ' + item.lastname}</Cell>
-                      <Cell>{item.telephone}</Cell>
-                      <Cell>{item.address}</Cell>
-                      <Cell>
-                        {item.type === 'Principal' && <p>{item.type}</p>}
-                        {item.type === 'Beneficiario' && (
-                          <div className="beneficiary_div">
-                            <p>{item.type}</p>
-                            <p>{`(${item.main_user_id})`}</p>
-                          </div>
-                        )}
-                      </Cell>
-                      <Cell
+                    <>
+                      <Row
+                        key={item.client_id}
+                        item={{ ...item, id: item.client_id }}
                         onClick={() =>
-                          item.type === 'Principal'
-                            ? showDatePicker(item)
-                            : showBeneficiaryAlert()
+                          handleExpandRow(parseInt(item.client_id))
                         }
                       >
-                        <p
+                        <Cell
                           style={{
-                            color:
-                              item.last_payment === 'Sin pago' ? 'red' : '',
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
+                            )
+                              ? 'bold'
+                              : 'normal',
                           }}
                         >
-                          {' '}
-                          {item.last_payment}
-                        </p>
-                      </Cell>
-                      <Cell>
-                        <p style={{ color: color }}>{status}</p>
-                      </Cell>
-                      <Cell>
-                        <FontAwesomeIcon
-                          icon={faPenToSquare}
-                          style={{ marginRight: '10px' }}
-                          onClick={() =>
-                            editClientPressed
-                              ? editClientPressed(item.client_id)
-                              : null
-                          }
-                        />
-                        <FontAwesomeIcon
-                          icon={faTrash}
-                          onClick={() =>
-                            showDeleteConfirmation(
-                              item.client_id,
-                              item.name + ' ' + item.lastname,
+                          {item.client_id}
+                        </Cell>
+                        <Cell
+                          style={{
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
                             )
+                              ? 'bold'
+                              : 'normal',
+                          }}
+                        >
+                          {item.name + ' ' + item.lastname}
+                        </Cell>
+                        <Cell
+                          style={{
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
+                            )
+                              ? 'bold'
+                              : 'normal',
+                          }}
+                        >
+                          {item.telephone}
+                        </Cell>
+                        <Cell
+                          style={{
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
+                            )
+                              ? 'bold'
+                              : 'normal',
+                          }}
+                        >
+                          {item.address}
+                        </Cell>
+                        <Cell
+                          style={{
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
+                            )
+                              ? 'bold'
+                              : 'normal',
+                          }}
+                        >
+                          {item.type === 'Principal' && <p>{item.type}</p>}
+                          {item.type === 'Beneficiario' && (
+                            <div className="beneficiary_div">
+                              <p>{item.type}</p>
+                              <p>{`(${item.main_user_id})`}</p>
+                            </div>
+                          )}
+                        </Cell>
+                        <Cell
+                          style={{
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
+                            )
+                              ? 'bold'
+                              : 'normal',
+                          }}
+                          onClick={() =>
+                            item.type === 'Principal'
+                              ? showDatePicker(item)
+                              : showBeneficiaryAlert()
                           }
-                        />
-                      </Cell>
-                    </Row>
+                        >
+                          <p
+                            style={{
+                              color:
+                                item.last_payment === 'Sin pago' ? 'red' : '',
+                            }}
+                          >
+                            {' '}
+                            {item.last_payment}
+                          </p>
+                        </Cell>
+                        <Cell
+                          style={{
+                            fontWeight: expandedRows.includes(
+                              parseInt(item.client_id),
+                            )
+                              ? 'bold'
+                              : 'normal',
+                          }}
+                        >
+                          <p style={{ color: color }}>{status}</p>
+                        </Cell>
+                        <Cell>
+                          <FontAwesomeIcon
+                            icon={faPenToSquare}
+                            style={{ marginRight: '10px' }}
+                            onClick={() =>
+                              editClientPressed
+                                ? editClientPressed(item.client_id)
+                                : null
+                            }
+                          />
+                          <FontAwesomeIcon
+                            icon={faTrash}
+                            onClick={() =>
+                              showDeleteConfirmation(
+                                item.client_id,
+                                item.name + ' ' + item.lastname,
+                              )
+                            }
+                          />
+                        </Cell>
+                      </Row>
+                      {isExpanded && (
+                        <>
+                          <Row item={{ ...item, id: item.client_id }}>
+                            <div className=" first-info-div extra-info-div "></div>
+                            <div className=" first-info-div extra-info-div extra-info-title">
+                              Fecha Creación:
+                            </div>
+                            <div className="extra-info-div first-info-div">
+                              {item.creation_date}
+                            </div>
+                            <div className="extra-info-div extra-info-title first-info-div">
+                              Creado por:
+                            </div>
+                            <div className="extra-info-div first-info-div">
+                              {item.created_by}
+                            </div>
+                            <div className="extra-info-div"></div>
+                            <div className="extra-info-div"></div>
+                            <div className="extra-info-div"></div>
+                          </Row>
+                          <Row item={{ ...item, id: item.client_id }}>
+                            <div className="extra-info-div "></div>
+                            <div className="extra-info-div extra-info-title">
+                              Fecha nacimiento:
+                            </div>
+                            <div className="extra-info-div">
+                              {item.birthdate}
+                            </div>
+                            <div className="extra-info-div extra-info-title">
+                              Email:
+                            </div>
+                            <div className="extra-info-div">{item.email}</div>
+                            <div className="extra-info-div"></div>
+                            <div className="extra-info-div"></div>
+                            <div className="extra-info-div"></div>
+                          </Row>
+                          <Row item={{ ...item, id: item.client_id }}>
+                            <div className="extra-info-div "></div>
+                            <div className="extra-info-div extra-info-title">
+                              Tipo documento:
+                            </div>
+                            <div className="extra-info-div last-info-div">
+                              {item.id_type || 'No definido'}
+                            </div>
+                            <div className="extra-info-div extra-info-title">
+                              Mascotas:
+                            </div>
+                            <div className="extra-info-div">
+                              {item.type === 'Principal'
+                                ? item.pets_number +
+                                  ' ' +
+                                  (item.pets_names
+                                    ? `(${item.pets_names})`
+                                    : '')
+                                : '(Ver usuario principal)'}
+                            </div>
+                            <div className="extra-info-div"></div>
+                            <div className="extra-info-div"></div>
+                            <div className="extra-info-div"></div>
+                          </Row>
+                        </>
+                      )}
+                    </>
                   )
                 })}
               </Body>

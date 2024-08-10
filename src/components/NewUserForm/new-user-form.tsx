@@ -1,12 +1,6 @@
-// import CssBaseline from '@mui/material/CssBaseline'
+import CssBaseline from '@mui/material/CssBaseline'
+import createTheme from '@mui/material/styles/createTheme'
 import { Box, FormControl, TextField } from '@mui/material'
-// import { BoxProps } from '@mui/material'
-// import { useTheme } from '@mui/material'
-// import FilledInput from '@mui/material/FilledInput'
-// import FormControl from '@mui/material/FormControl'
-// import InputLabel from '@mui/material/InputLabel'
-// import OutlinedInput from '@mui/material/OutlinedInput'
-
 import PersonIcon from '@mui/icons-material/Person'
 import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom'
 import './new-user.css'
@@ -20,6 +14,7 @@ import withReactContent from 'sweetalert2-react-content'
 import Swal from 'sweetalert2'
 import { useClients } from '../../services/firebase'
 import { useAuth } from '../../services/firebase'
+import { normalizeString, toProperCase } from '../../utils/strings'
 
 type props = {
   isShown: boolean
@@ -64,6 +59,8 @@ const NewUserForm: React.FC<props> = ({
 
   const [petNames, setPetNames] = useState('')
   const [petNumber, setPetnumber] = useState('0')
+
+  const [lastPayment, setLastPayment] = useState('')
 
   const idTypes = [
     'Cédula de Ciudadanía',
@@ -143,24 +140,25 @@ const NewUserForm: React.FC<props> = ({
     const mainUserIdFinal = isPrimary ? '' : mainUserId
     const clientTemp = new Client(
       clientId,
-      name,
+      toProperCase(normalizeString(name)),
       date,
       date,
       clientType,
-      address,
+      address.trim(),
       'Barranquilla',
-      'Atlantico',
-      email || 'No definido',
+      'Atlántico',
+      email.trim() || 'No definido',
       telephone,
       birthdate || 'No definido',
       '',
-      lastName,
+      toProperCase(normalizeString(lastName)),
       mainUserIdFinal,
-      '',
+      lastPayment,
       [],
       actualUser || undefined,
       petNumber || '0',
       petNames,
+      idType,
     )
     uploadClient(clientTemp)
       .then(() => {
@@ -185,15 +183,13 @@ const NewUserForm: React.FC<props> = ({
       setEmail(selectedClient.email)
       setAddress(selectedClient.address)
       setBirthdate(selectedClient.birthdate)
+      setIdType(selectedClient.id_type)
+      setPetnumber(selectedClient.pets_number)
+      setPetNames(selectedClient.pets_names)
+      setLastPayment(selectedClient.last_payment)
       return
     }
-    setName('')
-    setLastName('')
-    setClientId('')
-    setTelephone('')
-    setEmail('')
-    setAddress('')
-    setBirthdate('')
+    resetForm()
   }, [selectedClient])
 
   const resetForm = () => {
@@ -216,6 +212,7 @@ const NewUserForm: React.FC<props> = ({
     setIdType('')
     setPetNames('')
     setPetnumber('0')
+    setLastPayment('')
   }
 
   return (
@@ -275,7 +272,7 @@ const NewUserForm: React.FC<props> = ({
             </div>
           </div>
         </div>
-        <Box
+        {/* <Box
           style={{ marginLeft: -10 }}
           component="form"
           sx={{
@@ -382,13 +379,13 @@ const NewUserForm: React.FC<props> = ({
               />
             </>
           )}
-        </Box>
+        </Box> */}
         <button
           className="submit"
           style={{ background: theme.colors.primary }}
           onClick={saveValues}
         >
-          Crear
+          {selectedClient ? 'Editar' : 'Crear'}
         </button>
         <button
           className="submit-secondary"

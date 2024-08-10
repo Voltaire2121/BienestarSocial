@@ -1,19 +1,20 @@
 @media (min-width: 800px) {
-  .main-div {
+  .main-div-users {
     padding: 40px;
+    overflow-y: auto;
   }
 }
 
 @media (max-width: 799px) {
-  .main-div {
+  .main-div-users {
     padding: 10px;
     padding-top: 40px;
+    overflow-y: auto;
   }
 }
-.title {
+.main-div-users .title {
   width: 100%;
   text-align: center;
-  margin-bottom: 30px;
 }
 
 .table-div {
@@ -25,7 +26,7 @@
   min-width: 700px;
 }
 
-.main-div {
+.main-div-users {
   background-color: white;
   height: 100%;
 }
@@ -43,4 +44,59 @@
 
 .salesman_h1 {
   text-align: center;
+}
+
+.main-div-users .statistics {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 127px;
+  gap: 30px;
+}
+
+.main-div-users .statistics div {
+  height: 100%;
+  width: 90px;
+  background-color: #35a83620;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.main-div-users .statistics div:hover {
+  transform: scale(1.2);
+  transition: all 350ms ease-in-out;
+}
+
+.main-div-users .statistics .icon {
+  color: #35a836;
+  width: 40px;
+  height: 40px;
+}
+
+.main-div-users .statistics .quantity {
+  font-size: 25px;
+  font-weight: 600;
+  color: #35a836;
+  padding: 0px;
+  height: fit-content;
+}
+
+.main-div-users .statistics .stats-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #35a836;
+}
+
+.main-div-users .stats-text {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  cursor: pointer;
 }
